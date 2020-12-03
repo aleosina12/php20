@@ -1,0 +1,45 @@
+version: '3'
+services:
+  php:
+    build:
+      context: ./php
+      dockerfile: dockerfile
+    image: img-php # имя будущего образа
+    container_name: cont-php # имя контейнера после запуска
+    volumes:
+       - ./code:/data/application.local
+    networks:
+      - app-network
+ 
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: dockerfile
+    image: img-nginx
+    container_name: cont-nginx
+    volumes:
+      - ./code:/data/application.local
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - app-network
+ 
+  #контейнер с MySQL строим на базе стандартного образа, т.к. нет секции build
+  db:
+    image: mysql:5.7.22
+    container_name: db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: mydb
+      MYSQL_ROOT_PASSWORD: rootpass
+    volumes:
+      - ./dbdata:/var/lib/mysql  
+    networks:
+      - app-network
+ 
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
